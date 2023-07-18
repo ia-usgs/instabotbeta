@@ -1,0 +1,102 @@
+from tkinter import Tk, Button, Entry, Listbox, END, SINGLE, Label, Text, filedialog
+from instabot import Bot
+
+# Create a bot variable
+bot = Bot()
+user_list = []  # Initialize an empty user list
+
+# Function to handle button click event for adding a user
+def add_user():
+    user = user_entry.get()  # Get the user from the entry widget
+    user_list.append(user)  # Add the user to the user list
+    user_entry.delete(0, END)  # Clear the entry widget
+
+# Function to handle button click event for retrieving followers
+def get_followers():
+    followers_listbox.delete(0, END)  # Clear the followers listbox
+    
+    user = username_entry.get()  # Get the username from the username entry widget
+    followers = bot.get_user_followers(user)
+    followers_count = len(followers)
+    followers_listbox.insert(END, f"{user} - {followers_count} followers")
+
+# Function to handle button click event for sending likes to followers
+def send_likes_to_followers():
+    followers_count = followers_listbox.size()
+    for index in range(followers_count):
+        follower = followers_listbox.get(index).split(" - ")[0]
+        bot.send_like([follower])
+
+# Function to handle button click event for sending messages
+def send_messages():
+    message = message_text.get("1.0", "end").strip()  # Get the message from the message text box
+    selected_indices = followers_listbox.curselection()  # Get the indices of the selected followers
+    selected_users = [followers_listbox.get(index).split(" - ")[0] for index in selected_indices]  # Get the usernames of selected followers
+    bot.send_messages(message, selected_users)
+    message_text.delete("1.0", "end")  # Clear the message text box
+
+# Function to handle button click event for uploading a photo
+def upload_photo():
+    filename = filedialog.askopenfilename(initialdir="/", title="Select Photo", filetypes=(("JPEG files", "*.jpg"), ("PNG files", "*.png")))
+    caption = caption_entry.get()
+    bot.upload_photo(filename, caption=caption)
+
+# Function to handle button click event for logging in
+def login():
+    username = username_entry.get()  # Get the username from the username entry widget
+    password = password_entry.get()  # Get the password from the password entry widget
+    bot.login(username=username, password=password)
+
+# Create the main window
+window = Tk()
+
+# Create a username entry widget for entering the username to retrieve followers
+username_label = Label(window, text="Username:")
+username_label.grid(row=0, column=0, sticky="w")
+username_entry = Entry(window)
+username_entry.grid(row=0, column=1)
+
+# Create a password entry widget for entering the password
+password_label = Label(window, text="Password:")
+password_label.grid(row=1, column=0, sticky="w")
+password_entry = Entry(window, show="*")
+password_entry.grid(row=1, column=1)
+
+# Create a button to log in
+login_button = Button(window, text="Log In", command=login)
+login_button.grid(row=2, column=0, columnspan=2)
+
+# Create a button to retrieve followers
+get_followers_button = Button(window, text="Get Followers", command=get_followers)
+get_followers_button.grid(row=3, column=0, columnspan=2)
+
+# Create a listbox to display followers
+followers_listbox = Listbox(window, selectmode=SINGLE)
+followers_listbox.grid(row=4, column=0, columnspan=2)
+
+# Create a button to send likes to followers
+send_likes_button = Button(window, text="Send Likes to Followers", command=send_likes_to_followers)
+send_likes_button.grid(row=5, column=0, columnspan=2)
+
+# Create a text widget for entering the message
+message_label = Label(window, text="Message:")
+message_label.grid(row=6, column=0, sticky="w")
+message_text = Text(window, height=5)
+message_text.grid(row=6, column=1)
+
+# Create a button to send messages to selected users
+send_button = Button(window, text="Send Message", command=send_messages)
+send_button.grid(row=7, column=0, columnspan=2)
+
+# Create a caption entry widget for entering the photo caption
+caption_label = Label(window, text="Caption:")
+caption_label.grid(row=8, column=0, sticky="w")
+caption_entry = Entry(window)
+caption_entry.grid(row=8, column=1)
+
+# Create a button to upload a photo
+upload_button = Button(window, text="Upload Photo", command=upload_photo)
+upload_button.grid(row=9, column=0, columnspan=2)
+
+# Start the GUI event loop
+window.mainloop()
