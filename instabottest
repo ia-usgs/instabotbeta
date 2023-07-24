@@ -1,102 +1,172 @@
-from tkinter import Tk, Button, Entry, Listbox, END, SINGLE, Label, Text, filedialog
+import tkinter as tk
 from instabot import Bot
 
-# Create a bot variable
-bot = Bot()
-user_list = []  # Initialize an empty user list
+def follow_users():
+    list_of_user = entry_follow.get().split(", ")
+    bot.follow_users(list_of_user)
+    status_var.set(f"Following users: {', '.join(list_of_user)}")
 
-# Function to handle button click event for adding a user
-def add_user():
-    user = user_entry.get()  # Get the user from the entry widget
-    user_list.append(user)  # Add the user to the user list
-    user_entry.delete(0, END)  # Clear the entry widget
+def unfollow_users():
+    unfollow_list = entry_unfollow.get().split(", ")
+    bot.unfollow_users(unfollow_list)
+    status_var.set(f"Unfollowing users: {', '.join(unfollow_list)}")
 
-# Function to handle button click event for retrieving followers
-def get_followers():
-    followers_listbox.delete(0, END)  # Clear the followers listbox
-    
-    user = username_entry.get()  # Get the username from the username entry widget
+def unfollow_everyone():
+    bot.unfollow_everyone()
+    status_var.set("Unfollowing everyone.")
+
+def get_user_followers(followers_listbox=None):
+    user = entry_user_followers.get()
     followers = bot.get_user_followers(user)
-    followers_count = len(followers)
-    followers_listbox.insert(END, f"{user} - {followers_count} followers")
+    followers_listbox.delete(0, tk.END)  # Clear the existing list
+    for follower in followers:
+        followers_listbox.insert(tk.END, follower)
+    status_var.set(f"The number of followers for {user} are: {len(followers)}")
 
-# Function to handle button click event for sending likes to followers
-def send_likes_to_followers():
-    followers_count = followers_listbox.size()
-    for index in range(followers_count):
-        follower = followers_listbox.get(index).split(" - ")[0]
-        bot.send_like([follower])
-
-# Function to handle button click event for sending messages
 def send_messages():
-    message = message_text.get("1.0", "end").strip()  # Get the message from the message text box
-    selected_indices = followers_listbox.curselection()  # Get the indices of the selected followers
-    selected_users = [followers_listbox.get(index).split(" - ")[0] for index in selected_indices]  # Get the usernames of selected followers
-    bot.send_messages(message, selected_users)
-    message_text.delete("1.0", "end")  # Clear the message text box
+    message = entry_message.get()
+    list_of_users = entry_send_msg.get().split(", ")
+    bot.send_messages(message, list_of_users)
+    status_var.set(f"Sent message to users: {', '.join(list_of_users)}")
 
-# Function to handle button click event for uploading a photo
+def send_likes():
+    send_like_list = entry_send_like.get().split(", ")
+    bot.send_like(send_like_list)
+    status_var.set(f"Liking posts of users: {', '.join(send_like_list)}")
+
 def upload_photo():
-    filename = filedialog.askopenfilename(initialdir="/", title="Select Photo", filetypes=(("JPEG files", "*.jpg"), ("PNG files", "*.png")))
-    caption = caption_entry.get()
+    filename = entry_filename.get()
+    caption = entry_caption.get()
     bot.upload_photo(filename, caption=caption)
+    status_var.set(f"Uploaded photo '{filename}' with caption: {caption}")
 
-# Function to handle button click event for logging in
 def login():
-    username = username_entry.get()  # Get the username from the username entry widget
-    password = password_entry.get()  # Get the password from the password entry widget
+    username = entry_username.get()
+    password = entry_password.get()
     bot.login(username=username, password=password)
+    status_var.set("Logged in successfully!")
 
-# Create the main window
-window = Tk()
+def get_instagram_username():
+    return entry_username.get()
 
-# Create a username entry widget for entering the username to retrieve followers
-username_label = Label(window, text="Username:")
-username_label.grid(row=0, column=0, sticky="w")
-username_entry = Entry(window)
-username_entry.grid(row=0, column=1)
+def get_instagram_password():
+    return entry_password.get()
 
-# Create a password entry widget for entering the password
-password_label = Label(window, text="Password:")
-password_label.grid(row=1, column=0, sticky="w")
-password_entry = Entry(window, show="*")
-password_entry.grid(row=1, column=1)
+def get_follow_users():
+    return entry_follow.get()
 
-# Create a button to log in
-login_button = Button(window, text="Log In", command=login)
-login_button.grid(row=2, column=0, columnspan=2)
+def get_unfollow_users():
+    return entry_unfollow.get()
 
-# Create a button to retrieve followers
-get_followers_button = Button(window, text="Get Followers", command=get_followers)
-get_followers_button.grid(row=3, column=0, columnspan=2)
+def get_user_to_get_followers():
+    return entry_user_followers.get()
 
-# Create a listbox to display followers
-followers_listbox = Listbox(window, selectmode=SINGLE)
-followers_listbox.grid(row=4, column=0, columnspan=2)
+def get_message_to_send():
+    return entry_message.get()
 
-# Create a button to send likes to followers
-send_likes_button = Button(window, text="Send Likes to Followers", command=send_likes_to_followers)
-send_likes_button.grid(row=5, column=0, columnspan=2)
+def get_users_to_send_messages():
+    return entry_send_msg.get()
 
-# Create a text widget for entering the message
-message_label = Label(window, text="Message:")
-message_label.grid(row=6, column=0, sticky="w")
-message_text = Text(window, height=5)
-message_text.grid(row=6, column=1)
+def get_users_to_send_likes():
+    return entry_send_like.get()
 
-# Create a button to send messages to selected users
-send_button = Button(window, text="Send Message", command=send_messages)
-send_button.grid(row=7, column=0, columnspan=2)
+def get_photo_filename():
+    return entry_filename.get()
 
-# Create a caption entry widget for entering the photo caption
-caption_label = Label(window, text="Caption:")
-caption_label.grid(row=8, column=0, sticky="w")
-caption_entry = Entry(window)
-caption_entry.grid(row=8, column=1)
+def get_photo_caption():
+    return entry_caption.get()
 
-# Create a button to upload a photo
-upload_button = Button(window, text="Upload Photo", command=upload_photo)
-upload_button.grid(row=9, column=0, columnspan=2)
+# Create a bot instance
+bot = Bot()
 
-# Start the GUI event loop
-window.mainloop()
+# Create the main application window
+root = tk.Tk()
+root.title("Instabot GUI")
+
+# Create and position widgets
+label_username = tk.Label(root, text="Instagram Username:")
+entry_username = tk.Entry(root, width=30)
+
+label_password = tk.Label(root, text="Instagram Password:")
+entry_password = tk.Entry(root, show="*", width=30)
+
+btn_login = tk.Button(root, text="Login", command=login)
+
+label_follow = tk.Label(root, text="Follow users (comma-separated):")
+entry_follow = tk.Entry(root, width=40)
+
+label_unfollow = tk.Label(root, text="Unfollow users (comma-separated):")
+entry_unfollow = tk.Entry(root, width=40)
+
+btn_follow = tk.Button(root, text="Follow Users", command=follow_users)
+btn_unfollow = tk.Button(root, text="Unfollow Users", command=unfollow_users)
+btn_unfollow_everyone = tk.Button(root, text="Unfollow Everyone", command=unfollow_everyone)
+
+label_user_followers = tk.Label(root, text="Get followers for user:")
+entry_user_followers = tk.Entry(root, width=20)
+
+btn_get_user_followers = tk.Button(root, text="Get User Followers", command=get_user_followers)
+
+label_message = tk.Label(root, text="Message:")
+entry_message = tk.Entry(root, width=40)
+label_send_msg = tk.Label(root, text="Send message to users (comma-separated):")
+entry_send_msg = tk.Entry(root, width=40)
+
+btn_send_messages = tk.Button(root, text="Send Messages", command=send_messages)
+
+label_send_like = tk.Label(root, text="Send likes to users (comma-separated):")
+entry_send_like = tk.Entry(root, width=40)
+
+btn_send_likes = tk.Button(root, text="Send Likes", command=send_likes)
+
+label_filename = tk.Label(root, text="Photo filename:")
+entry_filename = tk.Entry(root, width=40)
+label_caption = tk.Label(root, text="Caption:")
+entry_caption = tk.Entry(root, width=40)
+
+btn_upload_photo = tk.Button(root, text="Upload Photo", command=upload_photo)
+
+status_var = tk.StringVar()
+label_status = tk.Label(root, textvariable=status_var)
+
+# Grid layout for widgets
+label_username.grid(row=0, column=0, padx=10, pady=5)
+entry_username.grid(row=0, column=1, padx=10, pady=5)
+label_password.grid(row=1, column=0, padx=10, pady=5)
+entry_password.grid(row=1, column=1, padx=10, pady=5)
+btn_login.grid(row=2, column=0, columnspan=2, padx=10, pady=5)
+
+label_follow.grid(row=3, column=0, padx=10, pady=5)
+entry_follow.grid(row=3, column=1, padx=10, pady=5)
+btn_follow.grid(row=3, column=2, padx=10, pady=5)
+
+label_unfollow.grid(row=4, column=0, padx=10, pady=5)
+entry_unfollow.grid(row=4, column=1, padx=10, pady=5)
+btn_unfollow.grid(row=4, column=2, padx=10, pady=5)
+
+btn_unfollow_everyone.grid(row=5, column=1, padx=10, pady=5)
+
+label_user_followers.grid(row=6, column=0, padx=10, pady=5)
+entry_user_followers.grid(row=6, column=1, padx=10, pady=5)
+btn_get_user_followers.grid(row=6, column=2, padx=10, pady=5)
+
+label_message.grid(row=7, column=0, padx=10, pady=5)
+entry_message.grid(row=7, column=1, padx=10, pady=5)
+label_send_msg.grid(row=8, column=0, padx=10, pady=5)
+entry_send_msg.grid(row=8, column=1, padx=10, pady=5)
+btn_send_messages.grid(row=8, column=2, padx=10, pady=5)
+
+label_send_like.grid(row=9, column=0, padx=10, pady=5)
+entry_send_like.grid(row=9, column=1, padx=10, pady=5)
+btn_send_likes.grid(row=9, column=2, padx=10, pady=5)
+
+label_filename.grid(row=10, column=0, padx=10, pady=5)
+entry_filename.grid(row=10, column=1, padx=10, pady=5)
+label_caption.grid(row=11, column=0, padx=10, pady=5)
+entry_caption.grid(row=11, column=1, padx=10, pady=5)
+btn_upload_photo.grid(row=11, column=2, padx=10, pady=5)
+
+label_status.grid(row=12, columnspan=3, padx=10, pady=5)
+
+# Start the main event loop
+root.mainloop()
